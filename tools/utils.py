@@ -113,19 +113,19 @@ def run_cmd(command, work_dir=None, chroot=None, redirect=False):
 
 
 def run_cmd_ext(command):
-    """ A version of run command that checks if the command exists befor running
+    """ A version of run command that checks if the command exists befor running 创建子进程 通过管道进行输出
 
     Positional arguments:
     command - the command line you are trying to invoke
     """
     assert is_cmd_valid(command[0])
     process = Popen(command, stdout=PIPE, stderr=PIPE)
-    _stdout, _stderr = process.communicate()
+    _stdout, _stderr = process.communicate() #和子进程交互，获得结果
     return _stdout, _stderr, process.returncode
 
 
 def is_cmd_valid(command):
-    """ Verify that a command exists and is executable
+    """ Verify that a command exists and is executable #命令路径存在且可执行返回True
 
     Positional arguments:
     command - the command to check
@@ -141,7 +141,7 @@ def is_cmd_valid(command):
 
 
 def is_exec(path):
-    """A simple check to verify that a path to an executable exists
+    """A simple check to verify that a path to an executable exists判断path是否可执行
 
     Positional arguments:
     path - the executable
@@ -150,27 +150,27 @@ def is_exec(path):
 
 
 def find_cmd_abspath(command):
-    """ Returns the absolute path to a command.
+    """ Returns the absolute path to a command.返回命令绝对路径
         None is returned if no absolute path was found.
 
     Positional arguhments:
     command - the command to find the path of
     """
     if exists(command) or exists(command + '.exe'):
-        return os.path.abspath(command)
+        return os.path.abspath(command) #返回命令的绝对路径
     if not 'PATH' in os.environ:
         raise Exception("Can't find command path for current platform ('%s')"
                         % sys.platform)
-    path_env = os.environ['PATH']
-    for path in path_env.split(os.pathsep):
-        cmd_path = '%s/%s' % (path, command)
+    path_env = os.environ['PATH']# 获得环境变量PATH
+    for path in path_env.split(os.pathsep):# 路径分隔符，windows ； ubunt :
+        cmd_path = '%s/%s' % (path, command)# path/command
         if exists(cmd_path) or exists(cmd_path + '.exe'):
-            return cmd_path
+            return cmd_path 
 
 
 def mkdir(path):
     """ a wrapped makedirs that only tries to create a directory if it does not
-    exist already
+    exist already 递归创建目录
 
     Positional arguments:
     path - the path to maybe create
@@ -187,13 +187,13 @@ def copy_file(src, dst):
     src - the source of the copy operation
     dst - the destination of the copy operation
     """
-    if isdir(dst):
+    if isdir(dst):# dst是目录
         _, base = split(src)
-        dst = join(dst, base)
-    copyfile(src, dst)
+        dst = join(dst, base) #组合dst,和src的文件名
+    copyfile(src, dst) #将src的内容复制给文件dst
 
 
-def delete_dir_files(directory):
+def delete_dir_files(directory):#删除目录下的文件，保留文件夹
     """ A function that does rm -rf
 
     Positional arguments:
@@ -204,23 +204,24 @@ def delete_dir_files(directory):
 
     for element in listdir(directory):
         to_remove = join(directory, element)
-        if not isdir(to_remove):
+        if not isdir(to_remove):# 不是文件夹，是文件
             remove(to_remove)
 
 
 def get_caller_name(steps=2):
     """
     When called inside a function, it returns the name
-    of the caller of that function.
+    of the caller of that function.当在函数内调用此函数，返回调用函数的名字
 
     Keyword arguments:
-    steps - the number of steps up the stack the calling function is
+    steps - the number of steps up the stack the calling function is 
+    inspect.stack()调用者堆栈的帧记录列表。返回列表中的第一个条目代表调用者;最后一个条目表示堆栈上最外层的调用。
     """
     return inspect.stack()[steps][3]
 
 
 def error(msg):
-    """Fatal error, abort hard
+    """Fatal error, abort hard 退出返回1
 
     Positional arguments:
     msg - the message to print before crashing
@@ -230,7 +231,7 @@ def error(msg):
 
 
 def rel_path(path, base, dot=False):
-    """Relative path calculation that optionaly always starts with a dot
+    """Relative path calculation that optionaly always starts with a dot #从base到path的相对路径
 
     Positional arguments:
     path - the path to make relative
@@ -239,7 +240,7 @@ def rel_path(path, base, dot=False):
     Keyword arguments:
     dot - if True, the path will always start with a './'
     """
-    final_path = relpath(path, base)
+    final_path = relpath(path, base)#从base到path的相对路径
     if dot and not final_path.startswith('.'):
         final_path = './' + final_path
     return final_path
@@ -256,18 +257,18 @@ class NotSupportedException(Exception):
 class InvalidReleaseTargetException(Exception):
     pass
 
-def split_path(path):
+def split_path(path):# 返回目录名，文件名，文件拓展名
     """spilt a file name into it's directory name, base name, and extension
 
     Positional arguments:
     path - the file name to split
     """
     base, has_ext = split(path)
-    name, ext = splitext(has_ext)
+    name, ext = splitext(has_ext)# 返回（文件名，文件拓展名.cpp）
     return base, name, ext
 
 
-def get_path_depth(path):
+def get_path_depth(path):# 路径深度
     """ Given a path, return the number of directory levels present.
         This roughly translates to the number of path separators (os.sep) + 1.
         Ex. Given "path/to/dir", this would return 3
@@ -276,7 +277,7 @@ def get_path_depth(path):
     Positional arguments:
     path - the path to calculate the depth of
     """
-    normalized_path = normpath(path)
+    normalized_path = normpath(path) #规范路径，\转换成\\等
     path_depth = 0
     head, tail = split(normalized_path)
 
@@ -287,7 +288,7 @@ def get_path_depth(path):
     return path_depth
 
 
-def args_error(parser, message):
+def args_error(parser, message):#中止与一个CLI程序的参数产生的错误 代码2
     """Abort with an error that was generated by the arguments to a CLI program
 
     Positional arguments:
@@ -298,7 +299,7 @@ def args_error(parser, message):
     sys.exit(2)
 
 
-def construct_enum(**enums):
+def construct_enum(**enums):# 返回一个新类型 参数表示新类型的属性或方法
     """ Create your own pseudo-enums
 
     Keyword arguments:
@@ -307,7 +308,7 @@ def construct_enum(**enums):
     return type('Enum', (), enums)
 
 
-def check_required_modules(required_modules, verbose=True):
+def check_required_modules(required_modules, verbose=True):# 检测模块是否安装
     """ Function checks for Python modules which should be "importable"
         before test suite can be used.
         @return returns True if all modules are installed already
@@ -316,7 +317,7 @@ def check_required_modules(required_modules, verbose=True):
     not_installed_modules = []
     for module_name in required_modules:
         try:
-            imp.find_module(module_name)
+            imp.find_module(module_name)# 返回三元组(file, pathname, description).file为刚打开的模块文件, pathname为模块的路径, description为imp.get_suffixes()返回的元组. 如果模块为包,file返回None, pathname为包路径, description返回的type为PKG_DIRECTORY. 
         except ImportError:
             # We also test against a rare case: module is an egg file
             try:
@@ -337,7 +338,7 @@ def check_required_modules(required_modules, verbose=True):
     else:
         return True
 
-def json_file_to_dict(fname):
+def json_file_to_dict(fname):# 读取json文件，字符编码方式改成ascii,输出为一个字典
     """ Read a JSON file and return its Python representation, transforming all
     the strings from Unicode to ASCII. The order of keys in the JSON file is
     preserved.
@@ -363,7 +364,7 @@ def argparse_type(casedness, prefer_hyphen=False):
             style of the argument.
             """
             if not isinstance(string, unicode):
-                string = string.decode()
+                string = string.decode()# 解码string
             if prefer_hyphen:
                 newstring = casedness(string).replace("_", "-")
             else:
@@ -382,7 +383,7 @@ def argparse_type(casedness, prefer_hyphen=False):
     return middle
 
 # short cuts for the argparse_type versions
-argparse_uppercase_type = argparse_type(unicode.upper, False)
+argparse_uppercase_type = argparse_type(unicode.upper, False) #返回一个函数middle(lst, type_name)，将字符串解码成unicode,变成大写，用"-"代替"_"，如果此时字符串在lst中返回否则抛出错误
 argparse_lowercase_type = argparse_type(unicode.lower, False)
 argparse_uppercase_hyphen_type = argparse_type(unicode.upper, True)
 argparse_lowercase_hyphen_type = argparse_type(unicode.lower, True)
@@ -393,7 +394,7 @@ def argparse_force_type(case):
     """
     def middle(lst, type_name):
         """ The parser type generator"""
-        if not isinstance(lst[0], unicode):
+        if not isinstance(lst[0], unicode):#将lst转换成unicode
             lst = [o.decode() for o in lst]
         def parse_type(string):
             """ The parser type"""
@@ -430,7 +431,7 @@ def argparse_filestring_type(string):
         raise argparse.ArgumentTypeError(
             "{0}"" does not exist in the filesystem.".format(string))
 
-def argparse_profile_filestring_type(string):
+def argparse_profile_filestring_type(string):#如果string是存在的路径，返回string,如果mbed-os/tools/profiles/<string>.json存在，则返回。否则出错
     """ An argument parser that verifies that a string passed in is either
     absolute path or a file name (expanded to
     mbed-os/tools/profiles/<fname>.json) of a existing file"""
@@ -446,25 +447,25 @@ def argparse_profile_filestring_type(string):
 def columnate(strings, separator=", ", chars=80):
     """ render a list of strings as a in a bunch of columns
 
-    Positional arguments:
+在打印之前将一个字符串分割成小块    Positional arguments:
     strings - the strings to columnate
 
     Keyword arguments;
     separator - the separation between the columns
     chars - the maximum with of a row
     """
-    col_width = max(len(s) for s in strings)
+    col_width = max(len(s) for s in strings)# 找出元素的最大长度
     total_width = col_width + len(separator)
     columns = math.floor(chars / total_width)
     output = ""
-    for i, string in zip(range(len(strings)), strings):
+    for i, string in zip(range(len(strings)), strings):# 将可迭代的对象作为参数，将对象中对应的元素打包成一个个元组，然后返回由这些元组组成的列表
         append = string
         if i != len(strings) - 1:
             append += separator
         if i % columns == columns - 1:
             append += "\n"
         else:
-            append = append.ljust(total_width)
+            append = append.ljust(total_width)#返回一个原字符串左对齐,并使用空格填充至指定长度的新字符串。如果指定的长度小于原字符串的长度则返回原字符串
         output += append
     return output
 
@@ -474,7 +475,7 @@ def argparse_dir_not_parent(other):
         """The parser type"""
         abs_other = abspath(other)
         abs_not_parent = abspath(not_parent)
-        if abs_not_parent == commonprefix([abs_not_parent, abs_other]):
+        if abs_not_parent == commonprefix([abs_not_parent, abs_other]):#返回list(多个路径)中，所有path共有的最长的路径。
             raise argparse.ArgumentTypeError(
                 "{0} may not be a parent directory of {1}".format(
                     not_parent, other))
@@ -490,7 +491,7 @@ def argparse_deprecate(replacement_message):
     return parse_type
 
 def print_large_string(large_string):
-    """ Breaks a string up into smaller pieces before print them
+    """ Breaks a string up into smaller pieces before print them在打印之前将一个字符串分割成小块
 
     This is a limitation within Windows, as detailed here:
     https://bugs.python.org/issue11395
@@ -500,7 +501,7 @@ def print_large_string(large_string):
     """
     string_limit = 1000
     large_string_len = len(large_string)
-    num_parts = int(ceil(float(large_string_len) / float(string_limit)))
+    num_parts = int(ceil(float(large_string_len) / float(string_limit))) # ceil返回数字的上入整数
     for string_part in range(num_parts):
         start_index = string_part * string_limit
         if string_part == num_parts - 1:
