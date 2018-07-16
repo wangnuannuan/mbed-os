@@ -31,7 +31,7 @@ from collections import namedtuple
 from itertools import count
 
 from elftools.common.py3compat import bytes2str
-from elftools.elf.elffile import ELFFile
+from elftools.elf.elffile import ELFFile #接受包含ELF文件内容的流（类文件对象）
 from elftools.elf.sections import SymbolTableSection
 
 logger = logging.getLogger(__name__)
@@ -318,7 +318,7 @@ class ElfFileSimple(ELFFile):
         self.symbols = self._read_symbol_table()
 
     def _read_symbol_table(self):
-        """Read the symbol table into the field "symbols" for easy use"""
+        """Read the symbol table into the field "symbols" for easy use# 读取 .symtab符号表，存储在 symbols 方便使用"""
         section = self.get_section_by_name(b".symtab")
         if not section:
             raise Exception("Missing symbol table")
@@ -342,7 +342,7 @@ class ElfFileSimple(ELFFile):
         :param size: number of bytes to read
         :return: Requested data or None if address is unmapped
         """
-        for segment in self.iter_segments():
+        for segment in self.iter_segments():# yield elf e_shnum section_header表的入口
             seg_addr = segment["p_paddr"]
             seg_size = min(segment["p_memsz"], segment["p_filesz"])
             if addr >= seg_addr + seg_size:
